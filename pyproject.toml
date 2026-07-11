@@ -16,6 +16,10 @@ dev = [
 
 [tool.ruff]
 line-length = 88
+fix = true
 
 [tool.ruff.format]
 line-ending = "auto"
+
+[tool.ruff.lint]
+fixable = ["F401"]
