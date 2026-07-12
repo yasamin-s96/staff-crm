@@ -1,15 +1,17 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db import transaction
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import CreateView, DetailView, ListView
 
 from crm.forms import EmployeeForm, UserForm, UserUpdateForm
 from crm.models import Employee
 
 
-class EmployeeCreateView(LoginRequiredMixin, View):
+class EmployeeCreateView(PermissionRequiredMixin, View):
+    permission_required = "crm.create_employee"
+
     def get(self, request, *args, **kwargs):
         employee_form = EmployeeForm()
         user_form = UserForm()
@@ -37,7 +39,9 @@ class EmployeeCreateView(LoginRequiredMixin, View):
         )
 
 
-class EmployeeUpdateView(LoginRequiredMixin, View):
+class EmployeeUpdateView(PermissionRequiredMixin, View):
+    permission_required = "crm.change_employee"
+
     def get_object(self):
         pk = self.kwargs.get("pk")
         employee = get_object_or_404(Employee, pk=pk)
@@ -57,6 +61,10 @@ class EmployeeUpdateView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         employee = self.get_object()
+        if employee.user == request.user:
+            raise ValueError(
+                "You're not allowed to make changes to your profile from this address!"
+            )
         employee_form = EmployeeForm(instance=employee, data=request.POST)
         user_form = UserUpdateForm(instance=employee.user, data=request.POST)
         if employee_form.is_valid() and user_form.is_valid():
@@ -85,7 +93,9 @@ class EmployeeDetailView(LoginRequiredMixin, DetailView):
     template_name = "crm/employee_profile.html"
 
 
-class EmployeeDeactivateView(LoginRequiredMixin, View):
+class EmployeeDeactivateView(PermissionRequiredMixin, View):
+    permission_required = "crm.deactivate_employee"
+
     def post(self, request, *args, **kwargs):
         employee = get_object_or_404(Employee, pk=self.kwargs["pk"])
         if employee.user == self.request.user:

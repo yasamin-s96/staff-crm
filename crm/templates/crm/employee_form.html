@@ -110,11 +110,11 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             column-gap: 1.5rem;
-            row-gap: 1rem;
+            row-gap: 1.5rem;
         }
 
-        form p {
-            margin-bottom: 0;
+        .form-grid > div {
+            position: relative;
             text-align: left;
         }
 
@@ -179,6 +179,14 @@
             list-style-type: none;
             margin-bottom: 0.5rem;
             padding: 0;
+        }
+
+        .form-grid .errorlist {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.25rem;
+            margin-bottom: 0;
         }
 
         button[type="submit"] {
@@ -258,14 +266,14 @@
                 {% if user_form %}
                     <h3 style="margin-top: 1rem; margin-bottom: 1rem; font-size: 1.1rem; color: var(--accent-color); text-align: left;">Account Information</h3>
                     <div class="form-grid">
-                        {{ user_form.as_p }}
+                        {{ user_form.as_div }}
                     </div>
                     <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 1.5rem 0;">
                     <h3 style="margin-top: 1rem; margin-bottom: 1rem; font-size: 1.1rem; color: var(--accent-color); text-align: left;">Employee Information</h3>
                 {% endif %}
 
                 <div class="form-grid">
-                    {{ form.as_p }}
+                    {{ form.as_div }}
                 </div>
 
                 <button type="submit">Save Employee</button>

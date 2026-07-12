@@ -90,9 +90,10 @@
         }
 
         /* Form Styles */
-        form p {
-            margin-bottom: 1.25rem;
+        form > div {
+            margin-bottom: 1.75rem;
             text-align: left;
+            position: relative;
         }
 
         label {
@@ -139,6 +140,14 @@
             list-style-type: none;
             margin-bottom: 0.5rem;
             padding: 0;
+        }
+
+        form > div .errorlist {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.25rem;
+            margin-bottom: 0;
         }
 
         button[type="submit"] {
@@ -198,7 +207,7 @@
                     </div>
                 {% endif %}
 
-                {{ form.as_p }}
+                {{ form.as_div }}
 
                 <button type="submit">Log In</button>
             </form>

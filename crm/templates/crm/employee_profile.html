@@ -190,6 +190,7 @@
                     </p>
                 </div>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                    {% if perms.crm.change_employee %}
                     <a href="{% url 'crm:employee_update' employee.pk %}" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9"></path>
@@ -197,8 +198,9 @@
                         </svg>
                         Edit Profile
                     </a>
+                    {% endif %}
                     
-                    {% if employee.user.is_active and employee.user != request.user %}
+                    {% if employee.user.is_active and employee.user != request.user and perms.crm.deactivate_employee %}
                     <form method="post" action="{% url 'crm:employee_deactivate' employee.pk %}" style="margin: 0;" onsubmit="return confirm('Are you sure you want to deactivate this employee?');">
                         {% csrf_token %}
                         <button type="submit" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease; cursor: pointer;">

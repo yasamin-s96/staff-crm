@@ -38,7 +38,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -78,6 +78,9 @@ class Employee(models.Model):
                 condition=Q(birth_date__lte=timezone.now().date()),
                 name="not_future_birth_date",
             ),
+        ]
+        permissions = [
+            ("deactivate_employee", "Can deactivate employee")
         ]
 
     def __str__(self):
