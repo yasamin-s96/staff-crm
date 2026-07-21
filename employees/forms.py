@@ -5,7 +5,7 @@ from django.contrib.auth.forms import (
     SetPasswordMixin,
 )
 
-from crm.models import Employee, User
+from employees.models import Employee, User
 
 
 class UserForm(UserCreationForm):

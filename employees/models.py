@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import check_password, make_password
-from django.db import models
 from django.contrib.auth.models import PermissionsMixin
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
@@ -15,6 +15,7 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+        user.full_clean()
         user.save(using=self._db)
         return user
 
@@ -38,7 +39,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     objects = UserManager()
 
@@ -58,14 +59,11 @@ class Employee(models.Model):
         FEMALE = "female", "Female"
         MALE = "male", "Male"
 
-    # class Role(models.TextChoices):
-    #     MANAGER = "manager", "Manager"
-    #     STAFF = "staff", "Staff Member"
-
-    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="employee")
+    user = models.OneToOneField(
+        User, on_delete=models.PROTECT, related_name="employee", null=True
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    # role = models.CharField(choices=Role.choices, max_length=50, default=Role.STAFF)
     birth_date = models.DateField()
     gender = models.CharField(choices=Gender.choices, max_length=10)
     department = models.ForeignKey(Department, on_delete=models.PROTECT)
@@ -79,9 +77,11 @@ class Employee(models.Model):
                 name="not_future_birth_date",
             ),
         ]
-        permissions = [
-            ("deactivate_employee", "Can deactivate employee")
-        ]
+        permissions = [("deactivate_employee", "Can deactivate employee")]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def is_active(self):
+        return self.user.is_active if self.user else False

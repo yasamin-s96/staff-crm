@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from crm.models import Employee, Department, User
+from employees.models import Employee, Department, User
 
 class EmployeeInline(admin.StackedInline):
     model = Employee

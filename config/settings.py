@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,12 +40,13 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
-AUTH_USER_MODEL = "crm.User"
+AUTH_USER_MODEL = "employees.User"
 
 # Application definition
 
 INSTALLED_APPS = [
-    "crm.apps.CrmConfig",
+    "rest_framework",
+    "employees",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -63,11 +65,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "staff_crm.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -79,7 +82,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "staff_crm.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
@@ -123,5 +126,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
-LOGIN_REDIRECT_URL = "crm:home"
+LOGIN_REDIRECT_URL = "employees:home"
 LOGOUT_REDIRECT_URL = "login"

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Employee - Staff CRM</title>
+    <title>Add Employee - Staff CRM</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -225,7 +225,7 @@
 <body>
     <div class="container">
         <!-- Back Link -->
-        <a href="{% url 'crm:home' %}" class="back-link">
+        <a href="{% url 'employees:home' %}" class="back-link">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -236,14 +236,15 @@
         <div class="glass-card">
             <div class="header-section">
                 <div class="welcome-icon">
-                    <!-- Pencil icon for edit -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
                     </svg>
                 </div>
-                <h1>Edit Employee</h1>
-                <p class="subtitle">Update the employee information below</p>
+                <h1>{{ view.kwargs.pk|yesno:"Edit Employee,Add New Employee" }}</h1>
+                <p class="subtitle">Fill out the employee information below</p>
             </div>
 
             <!-- Form -->
@@ -275,7 +276,7 @@
                     {{ form.as_div }}
                 </div>
 
-                <button type="submit">Update Employee</button>
+                <button type="submit">Save Employee</button>
             </form>
         </div>
     </div>

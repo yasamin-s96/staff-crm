@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('gender', models.CharField(choices=[('female', 'Female'), ('male', 'Male')], max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='crm.department')),
+                ('department', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='employees.department')),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={

@@ -219,8 +219,8 @@
                     </svg>
                     Employee Directory
                 </h2>
-                {% if perms.crm.create_employee %}
-                <a href="{% url 'crm:employee_create' %}" style="background: var(--accent-color); color: white; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: background 0.3s ease;">
+                {% if perms.employees.create_employee %}
+                <a href="{% url 'employees:employee_create' %}" style="background: var(--accent-color); color: white; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: background 0.3s ease;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Add Employee
                 </a>
@@ -243,7 +243,7 @@
                         {% for employee in employee_list %}
                         <tr>
                             <td style="font-weight: 500;">
-                                <a href="{% url 'crm:profile' employee.pk %}" style="color: var(--text-primary); text-decoration: none;">
+                                <a href="{% url 'employees:profile' employee.pk %}" style="color: var(--text-primary); text-decoration: none;">
                                     {{ employee.first_name }} {{ employee.last_name }}
                                 </a>
                             </td>
@@ -252,9 +252,9 @@
                             <td style="color: var(--text-secondary);">{{ employee.created_at|date:"M d, Y" }}</td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem;">
-                                    <a href="{% url 'crm:profile' employee.pk %}" class="view-btn">View</a>
-                                    {% if perms.crm.change_employee %}
-                                    <a href="{% url 'crm:employee_update' employee.pk %}" class="view-btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">Edit</a>
+                                    <a href="{% url 'employees:profile' employee.pk %}" class="view-btn">View</a>
+                                    {% if perms.employees.change_employee %}
+                                    <a href="{% url 'employees:employee_update' employee.pk %}" class="view-btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">Edit</a>
                                     {% endif %}
                                 </div>
                             </td>
