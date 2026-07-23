@@ -17,10 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django_scalar.views import scalar_viewer
+from drf_spectacular.views import SpectacularAPIView
 
 urlpatterns = [
-    path("", include("employees.urls")),
+    path("api/employees/", include("employees.urls")),
+    path("api/auth/", include("accounts.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", scalar_viewer, name="scalar"),
     path("admin/", admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path("api-auth/", include("rest_framework.urls")),
 ]

@@ -1,16 +1,19 @@
 from django.db import transaction
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
 from employees.models import Employee
+from employees.permissions import CanManageEmployeesOrReadOnly
 from employees.serializers import EmployeeSerializer, EmployeeUpdateSerializer
 from employees.serializers.user import UserSerializer
 
 
 class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Employee.objects.all()
+    permission_classes = (IsAuthenticated, CanManageEmployeesOrReadOnly)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -25,6 +28,7 @@ class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
 class AuthCredentialsUpsertView(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = Employee.objects.all()
+    permission_classes = (IsAuthenticated, CanManageEmployeesOrReadOnly)
 
     @transaction.atomic
     def put(self, request, *args, **kwargs):
@@ -44,6 +48,7 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
     serializer_class = EmployeeSerializer
     filter_backends = [OrderingFilter]
     ordering_fields = ["created_at"]
+    permission_classes = (IsAuthenticated, CanManageEmployeesOrReadOnly)
 
     @transaction.atomic
     def perform_create(self, serializer):
