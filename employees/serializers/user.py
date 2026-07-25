@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from employees.models import User
+from accounts.models import User
 
 
 class UserSerializer(serializers.Serializer):

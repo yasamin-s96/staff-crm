@@ -22,6 +22,7 @@ from drf_spectacular.views import SpectacularAPIView
 
 urlpatterns = [
     path("api/employees/", include("employees.urls")),
+    path("api/departments/", include("departments.urls")),
     path("api/auth/", include("accounts.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", scalar_viewer, name="scalar"),

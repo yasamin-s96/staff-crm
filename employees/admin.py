@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from employees.models import Employee, Department, User
+
+from accounts.models import User
+from departments.models import Department
+from employees.models import Employee
+
 
 class EmployeeInline(admin.StackedInline):
     model = Employee

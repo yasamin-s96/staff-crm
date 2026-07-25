@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from accounts.models import User
 from departments.models import Department
-from departments.serializers import DepartmentSerializer
-from employees.models import Employee, User
+from employees.models import Employee
+from employees.serializers.department import EmployeeDepartmentSerializer
 from employees.serializers.user import UserSerializer as UserCreateSerializer
 
 
@@ -14,7 +15,7 @@ class EmployeeSerializer(serializers.Serializer):
     birth_date = serializers.DateField()
     gender = serializers.ChoiceField(choices=Employee.Gender.choices)
     auth_credentials = UserCreateSerializer(required=False)
-    department = DepartmentSerializer(read_only=True)
+    department = EmployeeDepartmentSerializer(read_only=True)
     department_id = serializers.PrimaryKeyRelatedField(
         source="department", queryset=Department.objects.all(), write_only=True
     )

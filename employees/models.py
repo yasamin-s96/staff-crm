@@ -2,9 +2,6 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
-from accounts.models import User
-from departments.models import Department
-
 
 class Employee(models.Model):
     class Gender(models.TextChoices):
@@ -12,13 +9,13 @@ class Employee(models.Model):
         MALE = "male", "Male"
 
     user = models.OneToOneField(
-        User, on_delete=models.PROTECT, related_name="employee", null=True
+        "accounts.User", on_delete=models.PROTECT, related_name="employee", null=True
     )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     birth_date = models.DateField()
     gender = models.CharField(choices=Gender.choices, max_length=10)
-    department = models.ForeignKey(Department, on_delete=models.PROTECT)
+    department = models.ForeignKey("departments.Department", on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
