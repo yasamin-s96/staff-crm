@@ -19,6 +19,20 @@ class EmployeeSerializer(serializers.Serializer):
     department_id = serializers.PrimaryKeyRelatedField(
         source="department", queryset=Department.objects.all(), write_only=True
     )
+    emergency_contact_phone = serializers.CharField(
+        max_length=20, required=False, allow_null=True, allow_blank=True
+    )
+    emergency_contact_relationship = serializers.CharField(
+        max_length=100, required=False, allow_null=True, allow_blank=True
+    )
+    emergency_contact_name = serializers.CharField(
+        max_length=100, required=False, allow_null=True, allow_blank=True
+    )
+    employment_type = serializers.ChoiceField(
+        choices=Employee.EmploymentType.choices,
+        required=False,
+        default=Employee.EmploymentType.FULL_TIME,
+    )
     created_at = serializers.DateTimeField(read_only=True)
     is_active = serializers.BooleanField(
         required=False, default=False, allow_null=False
@@ -45,6 +59,20 @@ class EmployeeUpdateSerializer(serializers.Serializer):
         allow_null=False,
     )
     department_id = serializers.IntegerField(required=False, allow_null=False)
+    emergency_contact_phone = serializers.CharField(
+        max_length=20, required=False, allow_null=True, allow_blank=True
+    )
+    emergency_contact_relationship = serializers.CharField(
+        max_length=100, required=False, allow_null=True, allow_blank=True
+    )
+    emergency_contact_name = serializers.CharField(
+        max_length=100, required=False, allow_null=True, allow_blank=True
+    )
+    employment_type = serializers.ChoiceField(
+        choices=Employee.EmploymentType.choices,
+        required=False,
+        allow_null=False,
+    )
     is_active = serializers.BooleanField(required=False, allow_null=False)
 
     def validate_is_active(self, value):

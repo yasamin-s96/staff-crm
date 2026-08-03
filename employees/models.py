@@ -8,6 +8,12 @@ class Employee(models.Model):
         FEMALE = "female", "Female"
         MALE = "male", "Male"
 
+    class EmploymentType(models.TextChoices):
+        FULL_TIME = "Full Time", "Full Time"
+        PART_TIME = "Part Time", "Part Time"
+        CONTRACT = "Contract", "Contract"
+        INTERN = "Intern", "Intern"
+
     user = models.OneToOneField(
         "accounts.User", on_delete=models.PROTECT, related_name="employee", null=True
     )
@@ -17,6 +23,20 @@ class Employee(models.Model):
     gender = models.CharField(choices=Gender.choices, max_length=10)
     department = models.ForeignKey(
         "departments.Department", on_delete=models.PROTECT, related_name="employees"
+    )
+    emergency_contact_phone = models.CharField(
+        max_length=20, null=True, blank=True
+    )
+    emergency_contact_relationship = models.CharField(
+        max_length=100, null=True, blank=True
+    )
+    emergency_contact_name = models.CharField(
+        max_length=100, null=True, blank=True
+    )
+    employment_type = models.CharField(
+        max_length=100,
+        choices=EmploymentType.choices,
+        default=EmploymentType.FULL_TIME,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

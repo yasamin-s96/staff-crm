@@ -7,9 +7,30 @@ from rest_framework.status import HTTP_200_OK
 
 from departments.models import Department
 from employees.models import Employee
-from employees.permissions import CanManageEmployeesOrReadOnly
-from employees.serializers import EmployeeSerializer, EmployeeUpdateSerializer
+from employees.permissions import CanManageEmployeesOrReadOnly, CanManageSystemAccess
+from employees.serializers import (
+    EmployeeMeSerializer,
+    EmployeeSerializer,
+    EmployeeUpdateSerializer,
+)
 from employees.serializers.user import UserSerializer
+
+
+class EmployeeMeView(generics.RetrieveUpdateAPIView):
+    serializer_class = EmployeeMeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        user = self.request.user
+        if not hasattr(user, "employee") or user.employee is None:
+            from rest_framework.exceptions import NotFound
+
+            raise NotFound("Employee profile not found for current user.")
+        return user.employee
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
@@ -29,7 +50,7 @@ class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
 class AuthCredentialsUpsertView(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = Employee.objects.all()
-    permission_classes = (IsAuthenticated, CanManageEmployeesOrReadOnly)
+    permission_classes = (IsAuthenticated, CanManageSystemAccess)
 
     @transaction.atomic
     def put(self, request, *args, **kwargs):

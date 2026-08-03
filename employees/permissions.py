@@ -17,3 +17,19 @@ class CanManageEmployeesOrReadOnly(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return True
+
+
+class CanManageSystemAccess(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        return request.user.has_perms(
+            [
+                "accounts.change_user",
+                "accounts.add_user",
+            ]
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return True

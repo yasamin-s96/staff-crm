@@ -82,4 +82,8 @@ class EmployeeForm(forms.ModelForm):
             "birth_date",
             "gender",
             "department",
+            "emergency_contact_phone",
+            "emergency_contact_relationship",
+            "emergency_contact_name",
+            "employment_type",
         )
