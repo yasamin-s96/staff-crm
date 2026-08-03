@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
+from departments.models import Department
 from employees.models import Employee
 from employees.permissions import CanManageEmployeesOrReadOnly
 from employees.serializers import EmployeeSerializer, EmployeeUpdateSerializer
@@ -53,3 +54,36 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
     @transaction.atomic
     def perform_create(self, serializer):
         serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        department_id = request.query_params.get("department")
+        if department_id:
+            try:
+                department_id = int(department_id)
+            except ValueError:
+                department_id = None
+
+        include_children = request.query_params.get("include_children") == "true"
+        employees = self.get_queryset()
+
+        if employees and department_id:
+            department_ids = [department_id]
+            if include_children:
+                department = Department.objects.get(pk=department_id)
+                department_ids.extend(
+                    self._get_sub_departments(parent_department=department)
+                )
+            employees = employees.filter(department_id__in=department_ids)
+
+        serializer = self.get_serializer(instance=employees, many=True)
+        return Response(serializer.data)
+
+    def _get_sub_departments(self, parent_department):
+        sub_departments = parent_department.sub_departments.all()
+        sub_ids = []
+
+        for dep in sub_departments:
+            sub_ids.append(dep.id)
+            sub_ids.extend(self._get_sub_departments(dep))
+
+        return sub_ids

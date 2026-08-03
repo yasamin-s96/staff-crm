@@ -15,7 +15,9 @@ class Employee(models.Model):
     last_name = models.CharField(max_length=100)
     birth_date = models.DateField()
     gender = models.CharField(choices=Gender.choices, max_length=10)
-    department = models.ForeignKey("departments.Department", on_delete=models.PROTECT)
+    department = models.ForeignKey(
+        "departments.Department", on_delete=models.PROTECT, related_name="employees"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
