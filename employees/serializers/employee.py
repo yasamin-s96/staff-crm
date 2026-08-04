@@ -14,7 +14,7 @@ class EmployeeSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=100)
     birth_date = serializers.DateField()
     gender = serializers.ChoiceField(choices=Employee.Gender.choices)
-    auth_credentials = UserCreateSerializer(required=False)
+    auth_credentials = UserCreateSerializer(source="user", required=False)
     department = EmployeeDepartmentSerializer(read_only=True)
     department_id = serializers.PrimaryKeyRelatedField(
         source="department", queryset=Department.objects.all(), write_only=True
