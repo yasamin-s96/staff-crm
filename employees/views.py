@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
+from auditlog.mixins import AuditLogMixin
 from departments.models import Department
 from employees.filters import EmployeeFilter
 from employees.models import Employee
@@ -19,7 +20,7 @@ from employees.serializers import (
 from employees.serializers.user import UserSerializer
 
 
-class EmployeeMeView(generics.RetrieveUpdateAPIView):
+class EmployeeMeView(AuditLogMixin, generics.RetrieveUpdateAPIView):
     serializer_class = EmployeeMeSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -36,7 +37,7 @@ class EmployeeMeView(generics.RetrieveUpdateAPIView):
         serializer.save()
 
 
-class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+class EmployeeRetrieveUpdateView(AuditLogMixin, generics.RetrieveUpdateAPIView):
     queryset = Employee.objects.all()
     permission_classes = (IsAuthenticated, CanManageEmployeesOrReadOnly)
 
@@ -50,7 +51,7 @@ class EmployeeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         serializer.save()
 
 
-class AuthCredentialsUpsertView(generics.GenericAPIView):
+class AuthCredentialsUpsertView(AuditLogMixin, generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = Employee.objects.all()
     permission_classes = (IsAuthenticated, CanManageSystemAccess)
@@ -68,7 +69,7 @@ class AuthCredentialsUpsertView(generics.GenericAPIView):
         return Response(user_serializer.data, status=HTTP_200_OK)
 
 
-class EmployeeListCreateView(generics.ListCreateAPIView):
+class EmployeeListCreateView(AuditLogMixin, generics.ListCreateAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     filter_backends = [OrderingFilter, DjangoFilterBackend]

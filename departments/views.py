@@ -1,5 +1,6 @@
 from rest_framework import generics, viewsets
 
+from auditlog.mixins import AuditLogMixin
 from departments.models import Department
 from departments.serializers import (
     DepartmentEmployeeListSerializer,
@@ -7,7 +8,7 @@ from departments.serializers import (
 )
 
 
-class DepartmentViewSet(viewsets.ModelViewSet):
+class DepartmentViewSet(AuditLogMixin, viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
     queryset = Department.objects.all()
 
