@@ -10,6 +10,10 @@ urlpatterns = [
         views.EmployeeRetrieveUpdateView.as_view(),
     ),
     path(
+        "<int:pk>/terminate/",
+        views.EmployeeTerminateView.as_view(),
+    ),
+    path(
         "<int:pk>/account",
         views.AuthCredentialsUpsertView.as_view(),
     ),

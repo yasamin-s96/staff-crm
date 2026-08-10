@@ -24,20 +24,18 @@ class Employee(models.Model):
     department = models.ForeignKey(
         "departments.Department", on_delete=models.PROTECT, related_name="employees"
     )
-    emergency_contact_phone = models.CharField(
-        max_length=20, null=True, blank=True
-    )
+    emergency_contact_phone = models.CharField(max_length=20, null=True, blank=True)
     emergency_contact_relationship = models.CharField(
         max_length=100, null=True, blank=True
     )
-    emergency_contact_name = models.CharField(
-        max_length=100, null=True, blank=True
-    )
+    emergency_contact_name = models.CharField(max_length=100, null=True, blank=True)
     employment_type = models.CharField(
         max_length=100,
         choices=EmploymentType.choices,
         default=EmploymentType.FULL_TIME,
     )
+    termination_date = models.DateField(null=True, blank=True)
+    is_terminated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -48,7 +46,10 @@ class Employee(models.Model):
                 name="not_future_birth_date",
             ),
         ]
-        permissions = [("deactivate_employee", "Can deactivate employee")]
+        permissions = [
+            ("terminate_employee", "Can terminate employee"),
+            ("view_terminated_employee", "Can view terminated employee"),
+        ]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

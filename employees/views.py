@@ -1,17 +1,23 @@
 from django.db import transaction
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
 
 from auditlog.mixins import AuditLogMixin
+from auditlog.models import AuditLog
+from auditlog.services import create_audit_log
 from departments.models import Department
 from employees.filters import EmployeeFilter
 from employees.models import Employee
 from employees.pagination import EmployeeListPagination
-from employees.permissions import CanManageEmployeesOrReadOnly, CanManageSystemAccess
+from employees.permissions import (
+    CanManageEmployeesOrReadOnly,
+    CanManageSystemAccess,
+    CanTerminateEmployee,
+)
 from employees.serializers import (
     EmployeeMeSerializer,
     EmployeeSerializer,
@@ -20,7 +26,7 @@ from employees.serializers import (
 from employees.serializers.user import UserSerializer
 
 
-class EmployeeMeView(AuditLogMixin, generics.RetrieveUpdateAPIView):
+class EmployeeMeView(generics.RetrieveUpdateAPIView):
     serializer_class = EmployeeMeSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -51,6 +57,31 @@ class EmployeeRetrieveUpdateView(AuditLogMixin, generics.RetrieveUpdateAPIView):
         serializer.save()
 
 
+class EmployeeTerminateView(generics.GenericAPIView):
+    queryset = Employee.objects.filter(is_terminated=False)
+    permission_classes = (IsAuthenticated, CanTerminateEmployee)
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        employee = self.get_object()
+        employee.is_terminated = True
+        employee.termination_date = timezone.now()
+        employee.save()
+
+        create_audit_log(
+            actor=request.user,
+            action=AuditLog.Action.UPDATE,
+            instance=employee,
+            requested_changes={"is_terminated": True},
+            final_state={
+                "is_terminated": True,
+                "termination_date": employee.termination_date.date().isoformat(),
+            },
+        )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class AuthCredentialsUpsertView(AuditLogMixin, generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = Employee.objects.all()
@@ -60,13 +91,28 @@ class AuthCredentialsUpsertView(AuditLogMixin, generics.GenericAPIView):
     def put(self, request, *args, **kwargs):
         employee = self.get_object()
         user = employee.user
+        action = AuditLog.Action.UPDATE if user else AuditLog.Action.CREATE
+
         context = {**self.get_serializer_context(), "employee": employee}
         user_serializer = self.get_serializer(
             instance=user, data=request.data, context=context
         )
         user_serializer.is_valid(raise_exception=True)
-        user_serializer.save()
-        return Response(user_serializer.data, status=HTTP_200_OK)
+
+        # Capture requested changes
+        requested_changes = user_serializer.validated_data
+
+        user_instance = user_serializer.save()
+
+        create_audit_log(
+            actor=request.user,
+            action=action,
+            instance=user_instance,
+            requested_changes=requested_changes,
+            full_final_state=type(user_serializer)(user_instance, context=context).data,
+        )
+
+        return Response(user_serializer.data, status=status.HTTP_200_OK)
 
 
 class EmployeeListCreateView(AuditLogMixin, generics.ListCreateAPIView):
@@ -80,29 +126,34 @@ class EmployeeListCreateView(AuditLogMixin, generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        department_id = self.request.query_params.get("department")
-        if department_id:
-            try:
-                department_id = int(department_id)
-            except ValueError:
-                department_id = None
 
-        include_children = self.request.query_params.get("include_children") == "true"
+        if self.request.method == "GET":
+            query_params = self.request.query_params
+            if "show_terminated" not in query_params:
+                queryset = queryset.filter(is_terminated=False)
 
-        if department_id:
-            department_ids = [department_id]
-            if include_children:
-                department = Department.objects.get(pk=department_id)
-                department_ids.extend(
-                    self._get_sub_departments(parent_department=department)
-                )
-            queryset = queryset.filter(department_id__in=department_ids)
+            department_id = query_params.get("department")
+            if department_id:
+                try:
+                    department = Department.objects.get(pk=department_id)
+                except Department.DoesNotExist:
+                    return queryset.none()
+
+            include_children = query_params.get("include_children") == "true"
+
+            if department_id:
+                department_ids = [department_id]
+                if include_children:
+                    department_ids.extend(
+                        self._get_sub_departments(parent_department=department)
+                    )
+                queryset = queryset.filter(department_id__in=department_ids)
 
         return queryset
 
     @transaction.atomic
     def perform_create(self, serializer):
-        serializer.save()
+        super().perform_create(serializer)
 
     def _get_sub_departments(self, parent_department):
         sub_departments = parent_department.sub_departments.all()

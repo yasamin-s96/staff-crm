@@ -13,19 +13,19 @@ class UserSerializer(serializers.Serializer):
         min_length=8,
         max_length=16,
         required=False,
-        allow_null=False,
     )
+    is_active = serializers.BooleanField(required=False, default=True)
 
     def validate(self, attrs):
-        user = self.instance
+        existing_user = self.instance
         password = attrs.get("password")
 
-        if user is None and password is None:
+        if existing_user is None and password is None:
             raise ValidationError("Password is a required field for account creation.")
 
         if password is not None:
             try:
-                validate_password(password, user)
+                validate_password(password, existing_user)
             except DjangoValidationError as e:
                 raise ValidationError({"password": e.messages})
 

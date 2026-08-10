@@ -1,5 +1,5 @@
+from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
 from departments.models import Department
@@ -33,17 +33,16 @@ class EmployeeSerializer(serializers.Serializer):
         required=False,
         default=Employee.EmploymentType.FULL_TIME,
     )
-    created_at = serializers.DateTimeField(read_only=True)
-    is_active = serializers.BooleanField(
+    is_terminated = serializers.BooleanField(
         required=False, default=False, allow_null=False
     )
+    termination_date = serializers.DateField(required=False, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
         auth_credentials = validated_data.pop("auth_credentials", None)
-        is_active = validated_data.pop("is_active", False)
         user = None
         if auth_credentials:
-            auth_credentials.update({"is_active": is_active})
             user = User.objects.create_user(**auth_credentials)
         employee = Employee.objects.create(user=user, **validated_data)
         return employee
@@ -73,23 +72,16 @@ class EmployeeUpdateSerializer(serializers.Serializer):
         required=False,
         allow_null=False,
     )
-    is_active = serializers.BooleanField(required=False, allow_null=False)
-
-    def validate_is_active(self, value):
-        user = self.instance.user
-        is_active = value
-        if user is None and is_active is not None:
-            raise ValidationError(
-                "Employee doesn't own an account. Activation/Deactivation aborted."
-            )
+    termination_date = serializers.DateField(required=False, allow_null=True)
+    is_terminated = serializers.BooleanField(required=False, allow_null=False)
 
     def update(self, instance, validated_data):
-        is_active = validated_data.pop("is_active", None)
         employee = instance
-        user = employee.user
-        if user is not None and is_active is not None:
-            user.is_active = is_active
-            user.save()
+
+        is_terminated_req = validated_data.get("is_terminated")
+        if is_terminated_req is True and not employee.is_terminated:
+            if "termination_date" not in validated_data:
+                validated_data["termination_date"] = timezone.now().date()
 
         if validated_data:
             for attr, value in validated_data.items():
