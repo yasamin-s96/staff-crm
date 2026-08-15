@@ -24,6 +24,7 @@ from employees.serializers import (
     EmployeeUpdateSerializer,
 )
 from employees.serializers.user import UserSerializer
+from employees.services import update_employee_user
 
 
 class EmployeeMeView(generics.RetrieveUpdateAPIView):
@@ -87,32 +88,24 @@ class AuthCredentialsUpsertView(generics.GenericAPIView):
     queryset = Employee.objects.all()
     permission_classes = (IsAuthenticated, CanManageSystemAccess)
 
-    @transaction.atomic
     def put(self, request, *args, **kwargs):
         employee = self.get_object()
         user = employee.user
-        action = AuditLog.Action.UPDATE if user else AuditLog.Action.CREATE
 
-        context = {**self.get_serializer_context(), "employee": employee}
         user_serializer = self.get_serializer(
-            instance=user, data=request.data, context=context
+            instance=user,
+            data=request.data,
         )
         user_serializer.is_valid(raise_exception=True)
 
-        # Capture requested changes
-        requested_changes = user_serializer.validated_data
-
-        user_instance = user_serializer.save()
-
-        create_audit_log(
+        user_instance = update_employee_user(
+            employee=employee,
+            validated_data=user_serializer.validated_data,
             actor=request.user,
-            action=action,
-            instance=user_instance,
-            requested_changes=requested_changes,
-            full_final_state=type(user_serializer)(user_instance, context=context).data,
         )
 
-        return Response(user_serializer.data, status=status.HTTP_200_OK)
+        response_serializer = self.get_serializer(instance=user_instance)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 
 class EmployeeListCreateView(AuditLogMixin, generics.ListCreateAPIView):

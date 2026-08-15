@@ -30,30 +30,3 @@ class UserSerializer(serializers.Serializer):
                 raise ValidationError({"password": e.messages})
 
         return attrs
-
-    def create(self, validated_data):
-        try:
-            user = User.objects.create_user(**validated_data)
-        except DjangoValidationError as e:
-            raise ValidationError(e.message_dict)
-
-        employee = self.context["employee"]
-        employee.user = user
-        employee.save()
-        return user
-
-    def update(self, instance, validated_data):
-        password = validated_data.get("password")
-        email = validated_data.get("email")
-        instance.email = email
-
-        if password:
-            instance.set_password(password)
-
-        try:
-            instance.full_clean()
-        except DjangoValidationError as e:
-            raise ValidationError(e.message_dict)
-
-        instance.save()
-        return instance
