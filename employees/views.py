@@ -82,7 +82,7 @@ class EmployeeTerminateView(generics.GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AuthCredentialsUpsertView(AuditLogMixin, generics.GenericAPIView):
+class AuthCredentialsUpsertView(generics.GenericAPIView):
     serializer_class = UserSerializer
     queryset = Employee.objects.all()
     permission_classes = (IsAuthenticated, CanManageSystemAccess)

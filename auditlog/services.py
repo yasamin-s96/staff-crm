@@ -17,7 +17,7 @@ def create_audit_log(
     content_type = ContentType.objects.get_for_model(instance)
 
     if requested_changes is not None:
-        if full_final_state and final_state is None:
+        if full_final_state is not None and final_state is None:
             final_state = {
                 k: full_final_state[k]
                 for k in requested_changes
