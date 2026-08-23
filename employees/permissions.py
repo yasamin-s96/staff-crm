@@ -44,6 +44,14 @@ class CanTerminateEmployee(BasePermission):
         return employee_user != user
 
 
+class CanImportEmployee(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.has_perm("import_employee")
+
+    def has_object_permission(self, request, view, obj):
+        return True
+
+
 class CanManageSystemAccess(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:

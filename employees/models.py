@@ -22,7 +22,10 @@ class Employee(models.Model):
     birth_date = models.DateField()
     gender = models.CharField(choices=Gender.choices, max_length=10)
     department = models.ForeignKey(
-        "departments.Department", on_delete=models.PROTECT, related_name="employees"
+        "departments.Department",
+        on_delete=models.PROTECT,
+        related_name="employees",
+        null=True,
     )
     emergency_contact_phone = models.CharField(max_length=20, null=True, blank=True)
     emergency_contact_relationship = models.CharField(
@@ -49,6 +52,7 @@ class Employee(models.Model):
         permissions = [
             ("terminate_employee", "Can terminate employee"),
             ("view_terminated_employee", "Can view terminated employee"),
+            ("import_employee", "Can import employee"),
         ]
 
     def __str__(self):
@@ -57,3 +61,60 @@ class Employee(models.Model):
     @property
     def is_active(self):
         return self.user.is_active if self.user else False
+
+
+class EmployeeImportJob(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        PROCESSING = "PROCESSING", "Processing"
+        COMPLETED = "COMPLETED", "Completed"
+        FAILED = "FAILED", "Failed"
+
+    file = models.FileField(upload_to="employee_imports/")
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+    initiated_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.PROTECT,
+        related_name="employee_import_jobs",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Import Job #{self.id} - {self.get_status_display()}"
+
+
+class ImportJobItem(models.Model):
+    class Status(models.TextChoices):
+        ADDED = "ADDED", "Added"
+        SKIPPED = "SKIPPED", "Skipped"
+        ERROR = "ERROR", "Error"
+
+    job = models.ForeignKey(
+        EmployeeImportJob,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    row_number = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        db_index=True,
+    )
+    error_message = models.TextField(blank=True)
+    row_data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["job", "row_number"], name="unique_job_row_number"
+            )
+        ]
+
+    def __str__(self):
+        return f"Job {self.job_id} Item {self.row_number} - {self.get_status_display()}"
