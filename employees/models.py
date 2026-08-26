@@ -109,12 +109,5 @@ class ImportJobItem(models.Model):
     error_message = models.TextField(blank=True)
     row_data = models.JSONField(default=dict, blank=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["job", "row_number"], name="unique_job_row_number"
-            )
-        ]
-
     def __str__(self):
         return f"Job {self.job_id} Item {self.row_number} - {self.get_status_display()}"
