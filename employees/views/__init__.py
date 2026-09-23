@@ -1,6 +1,5 @@
 from employees.views.account import AuthCredentialsUpsertView, EmployeeMeView
 from employees.views.employee import (
-    EmployeeImportView,
     EmployeeListCreateView,
     EmployeeRetrieveUpdateView,
     EmployeeTerminateView,
@@ -8,7 +7,6 @@ from employees.views.employee import (
 
 __all__ = [
     "AuthCredentialsUpsertView",
-    "EmployeeImportView",
     "EmployeeListCreateView",
     "EmployeeMeView",
     "EmployeeRetrieveUpdateView",

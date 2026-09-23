@@ -1,5 +1,6 @@
 from django.db import transaction
 from rest_framework import generics, status
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -17,8 +18,6 @@ class EmployeeMeView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         user = self.request.user
         if not hasattr(user, "employee") or user.employee is None:
-            from rest_framework.exceptions import NotFound
-
             raise NotFound("Employee profile not found for current user.")
         return user.employee
 

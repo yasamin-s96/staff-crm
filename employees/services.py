@@ -3,8 +3,8 @@ from django.db import transaction
 
 from accounts.models import User
 from accounts.services import blacklist_user_tokens
-from auditlog.models import AuditLog
-from auditlog.services import create_audit_log
+from auditlogs.models import AuditLog
+from auditlogs.services import create_audit_log
 from employees.models import Employee
 
 

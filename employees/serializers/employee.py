@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from accounts.models import User
 from departments.models import Department
-from employees.models import Employee, EmployeeImportJob
+from employees.models import Employee
 from employees.serializers.department import EmployeeDepartmentSerializer
 from employees.serializers.user import UserSerializer as UserCreateSerializer
 
@@ -89,28 +89,3 @@ class EmployeeUpdateSerializer(serializers.Serializer):
             employee.save()
 
         return employee
-
-
-class EmployeeImportSerializer(serializers.Serializer):
-    file = serializers.FileField()
-
-    def validate_file(self, value):
-        max_size = 5 * 1024 * 1024  # 5 MB
-
-        if not value.name.endswith(".csv"):
-            raise serializers.ValidationError("Only CSV files are accepted.")
-
-        if value.content_type not in ("text/csv", "application/vnd.ms-excel"):
-            raise serializers.ValidationError("File content type is not CSV.")
-
-        if value.size > max_size:
-            raise serializers.ValidationError("File size must not exceed 5 MB.")
-
-        return value
-
-    def create(self, validated_data):
-        initiator = self.context["request"].user
-        file = validated_data["file"]
-
-        job = EmployeeImportJob.objects.create(file=file, initiated_by=initiator)
-        return job

@@ -4,7 +4,6 @@ from employees import views
 
 urlpatterns = [
     path("", views.EmployeeListCreateView.as_view()),
-    path("import/", views.EmployeeImportView.as_view()),
     path("me/", views.EmployeeMeView.as_view(), name="employee-me"),
     path(
         "<int:pk>/",

@@ -5,17 +5,15 @@ from rest_framework import generics, status
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from auditlog.mixins import AuditLogMixin
-from auditlog.models import AuditLog
-from auditlog.services import create_audit_log
+from auditlogs.mixins import AuditLogMixin
+from auditlogs.models import AuditLog
+from auditlogs.services import create_audit_log
 from departments.models import Department
 from employees.filters import EmployeeFilter
 from employees.models import Employee
 from employees.pagination import EmployeeListPagination
 from employees.permissions import (
-    CanImportEmployee,
     CanManageEmployeesOrReadOnly,
     CanTerminateEmployee,
 )
@@ -23,12 +21,6 @@ from employees.serializers import (
     EmployeeSerializer,
     EmployeeUpdateSerializer,
 )
-from employees.serializers.employee import EmployeeImportSerializer
-
-
-class EmployeeImportView(generics.CreateAPIView):
-    serializer_class = EmployeeImportSerializer
-    permission_classes = (IsAuthenticated, CanImportEmployee)
 
 
 class EmployeeRetrieveUpdateView(AuditLogMixin, generics.RetrieveUpdateAPIView):
